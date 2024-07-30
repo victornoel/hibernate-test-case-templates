@@ -15,11 +15,14 @@
  */
 package org.hibernate.bugs;
 
+import jakarta.persistence.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.annotations.*;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.testing.junit4.BaseCoreFunctionalTestCase;
+import org.hibernate.type.*;
 import org.junit.Test;
 
 /**
@@ -37,9 +40,19 @@ public class ORMUnitTestCase extends BaseCoreFunctionalTestCase {
 	@Override
 	protected Class[] getAnnotatedClasses() {
 		return new Class[] {
-//				Foo.class,
+				Foo.class,
 //				Bar.class
 		};
+	}
+
+	@Entity
+	public static final class Foo {
+		@Id
+		@GeneratedValue
+		private Long id;
+
+		@JdbcTypeCode(SqlTypes.LONG32VARBINARY)
+		private String field = null;
 	}
 
 	// If you use *.hbm.xml mappings, instead of annotations, add the mappings here.
@@ -72,7 +85,9 @@ public class ORMUnitTestCase extends BaseCoreFunctionalTestCase {
 		// BaseCoreFunctionalTestCase automatically creates the SessionFactory and provides the Session.
 		Session s = openSession();
 		Transaction tx = s.beginTransaction();
-		// Do stuff...
+
+		s.persist(new Foo());
+
 		tx.commit();
 		s.close();
 	}
